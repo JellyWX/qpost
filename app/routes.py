@@ -1,11 +1,34 @@
-from flask import render_template, request, flash
+from flask import render_template, request, flash, abort, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import app
+from app import app, db
 from app.models import User, Upload
 from app.forms import RegisterForm, LoginForm
 
 from tinyforms.fields import Field, EmailField
+
+from wand.image import Image
+
+@app.route('/create_post/', methods=['POST'])
+def create_post():
+    try:
+        f = request.files['image']
+    except KeyError:
+        return abort(400)
+
+    else:
+        try:
+            with Image(file=f.stream) as img:
+                img.format = 'jpeg'
+                img.transform('', '{0}x{0}>'.format(app.config['MAX_IMAGE_SIZE']))
+
+                upload = Upload(image=img.make_blob(), uploader=session.get('user'))
+                db.session.add(upload)
+                db.session.commit()
+        except:
+            flash('Invalid image')
+
+        return redirect( url_for('index') )
 
 
 @app.route('/login/', methods=['POST', 'GET'])
@@ -14,15 +37,21 @@ def login():
         try:
             form = LoginForm(request.form)
         except:
+            print('e')
             flash('Invalid login credentials')
 
         else:
-            user = User.query(((User.username == form.username) | (User.email == form.username)) & check_password_hash(User.password, form.password))
+            user = User.query.filter((User.username == form.username) | (User.email == form.username))
             if user.first() is None:
                 flash('Invalid login credentials')
 
             else:
-                return redirect( url_for('index') )
+                user = user.first()
+                if check_password_hash(user.password_hash, form.password):
+                    session['user'] = user.id
+                    return redirect( url_for('index') )
+                else:
+                    flash('Invalid login credentials')
 
     return render_template('login.html')
 
@@ -42,8 +71,8 @@ def register():
             flash('Email invalid')
 
         else:
-            check_email_query = User.query(User.email == form.email)
-            check_username_query = check_email_query.query(User.username == form.username)
+            check_email_query = User.query.filter(User.email == form.email)
+            check_username_query = User.query.filter(User.username == form.username)
             if check_email_query.first() is not None:
                 flash('Email taken')
 

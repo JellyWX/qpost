@@ -1,5 +1,4 @@
 import typing
-from tinyforms import Field
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Field():
@@ -11,7 +10,7 @@ class Field():
 
     def __init__(self, name: str, *, strict: bool=False, max_length: int=1024):
         self.name: str = name
-        self._raw_value: typing.Optional[str] = None
+        self._value: typing.Optional[str] = None
         self._strict: bool = strict
         self._max_length: int = max_length
 
@@ -27,7 +26,7 @@ class Field():
             self._value = value
 
     def validate(self):
-        if self._raw_value is None and self._strict:
+        if self._value is None and self._strict:
             raise self.MissingFieldData
         elif self._value is not None:
             self._type_specific_validation()

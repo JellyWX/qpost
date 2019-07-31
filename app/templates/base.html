@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>Newgram - {{ title }}</title>
+    </head>
+    <body>
+        <ul>
+            {% for message in get_flashed_messages() %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+
+
+        {% block content %}
+        {% endblock %}
+
+    </body>
+</html>
