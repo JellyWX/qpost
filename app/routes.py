@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort, redirect, url_for, session
+from flask import render_template, request, flash, abort, redirect, url_for, session, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import app, db
@@ -9,10 +9,13 @@ from tinyforms.fields import Field, EmailField
 
 from wand.image import Image
 
+import io
+
 @app.route('/create_post/', methods=['POST'])
 def create_post():
     try:
         f = request.files['image']
+        description = request.form['description']
     except KeyError:
         return abort(400)
 
@@ -22,7 +25,7 @@ def create_post():
                 img.format = 'jpeg'
                 img.transform('', '{0}x{0}>'.format(app.config['MAX_IMAGE_SIZE']))
 
-                upload = Upload(image=img.make_blob(), uploader=session.get('user'))
+                upload = Upload(image=img.make_blob(), uploader=session.get('user'), description=description)
                 db.session.add(upload)
                 db.session.commit()
         except:
@@ -31,13 +34,23 @@ def create_post():
         return redirect( url_for('index') )
 
 
+@app.route('/view_post/<int:id>')
+def view_post(id: int):
+    img = Upload.query.get(id)
+
+    if img is None:
+        return abort(404)
+
+    else:
+        return send_file(io.BytesIO(img.image), mimetype='image/jpeg', attachment_filename='{}.jpeg'.format(id))
+
+
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
         try:
             form = LoginForm(request.form)
         except:
-            print('e')
             flash('Invalid login credentials')
 
         else:
