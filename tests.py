@@ -73,5 +73,77 @@ class LoginCase(unittest.TestCase):
 
         self.assertRaises(EmailField.InvalidEmail, lambda: RegisterForm({'username': 'test', 'email': 'testgmail.com', 'password': 'hello world'}))
 
+
+class UserModelCase(unittest.TestCase):
+    def setUp(self):
+        SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{usern}@localhost/newgram_test?charset=utf8mb4'.format(usern='jude', passwd=None)
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_following(self):
+        u1 = User(username='t1', email='t1@mail.com', password_hash=generate_password_hash('hello world'))
+        db.session.add(u1)
+        u2 = User(username='t2', email='t2@mail.com', password_hash=generate_password_hash('hello world'))
+        db.session.add(u2)
+
+        db.session.commit()
+
+        self.assertFalse(u1.follows(u2))
+        self.assertFalse(u2.follows(u1))
+        self.assertTrue(u1.follows(u1))
+        self.assertTrue(u2.follows(u2))
+
+        u1.follow(u2)
+        db.session.commit()
+
+        self.assertTrue(u1.follows(u2))
+        self.assertFalse(u2.follows(u1))
+
+        u2.follow(u1)
+        db.session.commit()
+
+        self.assertTrue(u1.follows(u2))
+        self.assertTrue(u2.follows(u1))
+
+        u1.unfollow(u2)
+        db.session.commit()
+
+        self.assertFalse(u1.follows(u2))
+        self.assertTrue(u2.follows(u1))
+
+        try:
+            u1.unfollow(u1)
+            db.session.commit()
+        except:
+            self.fail('Unfollowing self raised error')
+        else:
+            self.assertFalse(u1.follows(u2))
+            self.assertTrue(u2.follows(u1))
+            self.assertTrue(u1.follows(u1))
+
+        try:
+            u1.unfollow(u2)
+            db.session.commit()
+
+        except:
+            self.fail('Unfollowing person not followed raised error')
+
+        self.assertTrue(u2.follows(u1))
+
+        try:
+            u2.follow(u1)
+            db.session.commit()
+        except:
+            self.fail('Following user already followed raised error')
+
+        User.query.filter(User.id == u1.id).delete(synchronize_session='fetch')
+
+        self.assertTrue(u2.followed.count() == 0)
+
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

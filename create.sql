@@ -3,7 +3,7 @@ CREATE TABLE newgram.users (
 
     username VARCHAR (32) UNIQUE NOT NULL,
     bio VARCHAR (256) NOT NULL DEFAULT "",
-    email VARCHAR (128) NOT NULL,
+    email VARCHAR (128) UNIQUE NOT NULL,
 --    verified TINYINT NOT NULL DEFAULT 0,
     password_hash VARCHAR (93) NOT NULL,
 

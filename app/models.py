@@ -35,9 +35,9 @@ class User(db.Model):
 
     id = db.Column(INTEGER(unsigned=True), unique=True, primary_key=True)
 
-    username = db.Column(db.String(32), nullable=False)
+    username = db.Column(db.String(32), unique=True, nullable=False)
     bio = db.Column(db.String(256), nullable=False, default='')
-    email = db.Column(db.String(128), nullable=False)
+    email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(93), nullable=False)
 
     posts = db.relationship('Upload', backref='uploaded_by', foreign_keys=[Upload.uploader])
@@ -53,6 +53,19 @@ class User(db.Model):
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
+
+    def unfollow(self, user: 'User'):
+        if self.follows(user) and user.id != self.id:
+            self.followed.remove(user)
+
+    def follow(self, user: 'User'):
+        if self.follows(user):
+            pass
+        else:
+            self.followed.append(user)
+
+    def follows(self, user: 'User') -> bool:
+        return user.id == self.id or self.followed.filter(followers_table.c.followed_id == user.id).count() > 0
 
     @classmethod
     def create_from_form(cls, form: RegisterForm):

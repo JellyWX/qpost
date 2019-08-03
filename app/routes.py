@@ -27,25 +27,31 @@ def logged_in_as() -> typing.Optional[User]:
 
 @app.route('/create_post/', methods=['POST'])
 def create_post():
-    try:
-        f = request.files['image']
-        description = request.form['description']
-    except KeyError:
-        return abort(400)
+    user: typing.Optional[User] = logged_in_as()
+
+    if user is None:
+        return abort(403)
 
     else:
         try:
-            with Image(file=f.stream) as img:
-                img.format = 'jpeg'
-                img.transform('', '{0}x{0}>'.format(app.config['MAX_IMAGE_SIZE']))
+            f = request.files['image']
+            description = request.form['description']
+        except KeyError:
+            return abort(400)
 
-                upload = Upload(image=img.make_blob(), uploader=session.get('user'), description=description)
-                db.session.add(upload)
-                db.session.commit()
-        except:
-            Warning('Invalid image')
+        else:
+            try:
+                with Image(file=f.stream) as img:
+                    img.format = 'jpeg'
+                    img.transform('', '{0}x{0}>'.format(app.config['MAX_IMAGE_SIZE']))
 
-        return redirect( url_for('index') )
+                    upload = Upload(image=img.make_blob(), uploader=user.id, description=description)
+                    db.session.add(upload)
+                    db.session.commit()
+            except:
+                Warning('Invalid image')
+
+            return redirect( url_for('index') )
 
 
 @app.route('/view_post/<int:id>/')
@@ -57,6 +63,21 @@ def view_post(id: int):
 
     else:
         return send_file(io.BytesIO(img.image), mimetype='image/jpeg', attachment_filename='{}.jpeg'.format(id))
+
+
+@app.route('/follow_user/<int:id>/')
+def follow_user(id: int):
+    user_a = logged_in_as()
+    user_b = User.query.get(id)
+
+    if user_a is None:
+        return abort(403)
+
+    elif user_b is None:
+        return abort(404)
+
+    else:
+        user_a.follow(user_b)
 
 
 @app.route('/login/', methods=['POST', 'GET'])
