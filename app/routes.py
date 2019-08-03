@@ -7,9 +7,23 @@ from app.forms import RegisterForm, LoginForm
 
 from tinyforms.fields import Field, EmailField
 
+from bootstrap_alert import Warning, Danger 
+
 from wand.image import Image
 
+import typing
 import io
+
+
+def logged_in_as() -> typing.Optional[User]:
+    uid = session.get('user', None)
+
+    if uid is not None:
+        return User.query.get(uid)
+
+    else:
+        return None
+
 
 @app.route('/create_post/', methods=['POST'])
 def create_post():
@@ -29,12 +43,12 @@ def create_post():
                 db.session.add(upload)
                 db.session.commit()
         except:
-            flash('Invalid image')
+            Warning('Invalid image')
 
         return redirect( url_for('index') )
 
 
-@app.route('/view_post/<int:id>')
+@app.route('/view_post/<int:id>/')
 def view_post(id: int):
     img = Upload.query.get(id)
 
@@ -51,12 +65,12 @@ def login():
         try:
             form = LoginForm(request.form)
         except:
-            flash('Invalid login credentials')
+            Danger('Invalid login credentials')
 
         else:
             user = User.query.filter((User.username == form.username) | (User.email == form.username))
             if user.first() is None:
-                flash('Invalid login credentials')
+                Danger('Invalid login credentials')
 
             else:
                 user = user.first()
@@ -64,9 +78,9 @@ def login():
                     session['user'] = user.id
                     return redirect( url_for('index') )
                 else:
-                    flash('Invalid login credentials')
+                    Danger('Invalid login credentials')
 
-    return render_template('login.html')
+    return render_template('login.html', title='Login')
 
 
 @app.route('/register/', methods=['POST', 'GET'])
@@ -75,33 +89,45 @@ def register():
         try:
             form = RegisterForm(request.form)
         except Field.FieldLengthExceeded:
-            flash('Maximum username/email length exceeded')
+            Danger('Maximum username/email length exceeded')
 
         except Field.MissingFieldData:
-            flash('Please complete all fields')
+            Danger('Please complete all fields')
 
         except EmailField.InvalidEmail:
-            flash('Email invalid')
+            Danger('Email invalid')
 
         else:
             check_email_query = User.query.filter(User.email == form.email)
             check_username_query = User.query.filter(User.username == form.username)
             if check_email_query.first() is not None:
-                flash('Email taken')
+                Info('Email taken')
 
             elif check_username_query.first() is not None:
-                flash('Username taken')
+                Info('Username taken')
 
             else:
                 user = User.create_from_form(form)
                 db.session.add(user)
                 db.session.commit()
 
+                session['user'] = user.id
+
                 return redirect( url_for('login') )
 
-    return render_template('registration.html')
+    return render_template('registration.html', title='Register')
+
+@app.route('/anonymize/')
+def anonymize():
+    session.pop('user')
+
+    return redirect( url_for('index') )
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html',
+        logged_in = logged_in_as() is not None,
+        user = logged_in_as(),
+        title = 'Home'
+    )
