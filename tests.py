@@ -139,6 +139,13 @@ class UserModelCase(unittest.TestCase):
         except:
             self.fail('Following user already followed raised error')
 
+        u2.toggle_follow(u1)
+        u1.toggle_follow(u2)
+        db.session.commit()
+
+        self.assertFalse(u2.follows(u1))
+        self.assertTrue(u1.follows(u2))
+
         User.query.filter(User.id == u1.id).delete(synchronize_session='fetch')
 
         self.assertTrue(u2.followed.count() == 0)

@@ -65,8 +65,8 @@ def view_post(id: int):
         return send_file(io.BytesIO(img.image), mimetype='image/jpeg', attachment_filename='{}.jpeg'.format(id))
 
 
-@app.route('/follow_user/<int:id>/')
-def follow_user(id: int):
+@app.route('/toggle_follow/<int:id>/')
+def toggle_follow(id: int):
     user_a = logged_in_as()
     user_b = User.query.get(id)
 
@@ -77,7 +77,7 @@ def follow_user(id: int):
         return abort(404)
 
     else:
-        user_a.follow(user_b)
+        user_a.toggle_follow(user_b)
 
 
 @app.route('/login/', methods=['POST', 'GET'])

@@ -64,6 +64,14 @@ class User(db.Model):
         else:
             self.followed.append(user)
 
+    def toggle_follow(self, user: 'User'):
+        if user.id == self.id:
+            pass
+        elif self.follows(user):
+            self.unfollow(user)
+        else:
+            self.follow(user)
+
     def follows(self, user: 'User') -> bool:
         return user.id == self.id or self.followed.filter(followers_table.c.followed_id == user.id).count() > 0
 
