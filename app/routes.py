@@ -93,7 +93,7 @@ def register():
                 flash('Username taken')
 
             else:
-                user = User(username=form.username, password_hash=form.password, email=form.email)
+                user = User.create_from_form(form)
                 db.session.add(user)
                 db.session.commit()
 
