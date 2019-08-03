@@ -19,8 +19,16 @@ class Upload(db.Model):
 
     image = db.Column(MEDIUMBLOB, nullable=False)
 
-    uploader = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.id', ondelete='cascade'))
+    uploader = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.id', ondelete='set null'))
 
+class Comment(db.Model):
+    __tablename__ = 'comments'
+
+    id = db.Column(INTEGER(unsigned=True), unique=True, primary_key=True)
+
+    content = db.Column(db.String(160), nullable=False)
+    post = db.Column(INTEGER(unsigned=True), db.ForeignKey('uploads.id', ondelete='cascade'))
+    commenter = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.id', ondelete='set null'))
 
 class User(db.Model):
     __tablename__ = 'users'

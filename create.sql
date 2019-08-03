@@ -27,3 +27,23 @@ CREATE TABLE newgram.uploads (
 
     PRIMARY KEY (id)
 );
+
+CREATE TABLE newgram.comments (
+    id INT UNSIGNED UNIQUE AUTO_INCREMENT NOT NULL,
+
+    content VARCHAR(160) NOT NULL,
+    post INT UNSIGNED NOT NULL,
+    commenter INT UNSIGNED,
+
+    CONSTRAINT post_cx
+    FOREIGN KEY post_fk (post)
+    REFERENCES uploads (id)
+    ON DELETE CASCADE,
+
+    CONSTRAINT commenter_cx
+    FOREIGN KEY commenter_fk (commenter)
+    REFERENCES users (id)
+    ON DELETE SET NULL,
+
+    PRIMARY KEY (id)
+);
