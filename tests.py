@@ -151,6 +151,5 @@ class UserModelCase(unittest.TestCase):
         self.assertTrue(u2.followed.count() == 0)
 
 
-
 if __name__ == '__main__':
     unittest.main(verbosity=2)

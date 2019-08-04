@@ -54,8 +54,8 @@ def create_post():
             return redirect( url_for('index') )
 
 
-@app.route('/view_post/<int:id>/')
-def view_post(id: int):
+@app.route('/post/<int:id>/img')
+def view_post_image(id: int):
     img = Upload.query.get(id)
 
     if img is None:
@@ -78,6 +78,26 @@ def toggle_follow(id: int):
 
     else:
         user_a.toggle_follow(user_b)
+        db.session.commit()
+
+    return redirect( url_for('view_user', id=id) )
+
+
+@app.route('/user/<int:id>/')
+def view_user(id: int):
+    current_user = logged_in_as()
+    viewing = User.query.get(id)
+
+    if viewing is None:
+        return abort(404)
+
+    else:
+        return render_template('profile.html',
+            logged_in = current_user is not None,
+            user = current_user,
+            profile = viewing,
+            title = viewing.username
+        )
 
 
 @app.route('/login/', methods=['POST', 'GET'])
@@ -101,7 +121,11 @@ def login():
                 else:
                     Danger('Invalid login credentials')
 
-    return render_template('login.html', title='Login')
+    return render_template('login.html',
+        logged_in = logged_in_as() is not None,
+        user = logged_in_as(),
+        title = 'Login',
+    )
 
 
 @app.route('/register/', methods=['POST', 'GET'])
@@ -134,9 +158,13 @@ def register():
 
                 session['user'] = user.id
 
-                return redirect( url_for('login') )
+                return redirect( url_for('index') )
 
-    return render_template('registration.html', title='Register')
+    return render_template('registration.html',
+        logged_in = logged_in_as() is not None,
+        user = logged_in_as(),
+        title = 'Register'
+    )
 
 @app.route('/anonymize/')
 def anonymize():

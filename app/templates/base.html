@@ -8,33 +8,31 @@
 
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             {% if logged_in %}
-                <a class="navbar-brand" href="#">
+                <a class="navbar-brand" href="{{ url_for('view_user', id=user.id) }}">
                     Account
                 </a>
             {% endif %}
 
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav mr-auto">
-                    {% if logged_in %}
-                        <li class="nav-item">
-                            <a class="btn btn-info text-light" href="{{ url_for('anonymize') }}">
-                                Log Out
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="btn btn-info text-light" href="{{ url_for('login') }}">
-                                Login
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-success text-light" href="{{ url_for('register') }}">
-                                Register
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
+            <ul class="navbar-nav mr-auto">
+                {% if logged_in %}
+                    <li class="nav-item">
+                        <a class="btn btn-info text-light" href="{{ url_for('anonymize') }}">
+                            Log Out
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-info text-light" href="{{ url_for('login') }}">
+                            Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-success text-light" href="{{ url_for('register') }}">
+                            Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
 
         </nav>
 

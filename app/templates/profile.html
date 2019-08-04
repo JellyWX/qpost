@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <h1>{{ profile.username }}</h1>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-5">
+            <div class="display-4 text-center">
+                420
+            </div>
+            <div class="text-center">Followers</div>
+        </div>
+        <div class="col-2">
+            <img src="https://jellywx.com/static/img/logo.png" class="img-fluid"></img>
+        </div>
+        <div class="col-5">
+            <div class="text-center">Following</div>
+            <div class="display-4 text-center">
+                333
+            </div>
+        </div>
+    </div>
+    <br>
+    {% if logged_in and user.id != profile.id %}
+        <div class="row">
+            <div class="col-2">
+            </div>
+            <div class="col-8 text-center">
+                <form method="GET" action="{{ url_for('toggle_follow', id=profile.id) }}">
+                    {% if user.follows(profile) %}
+                        <button type="submit" class="btn btn-outline-dark" style="width: 95%">Unfollow</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary text-light" style="width: 95%">Follow</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
