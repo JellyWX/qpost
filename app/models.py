@@ -40,7 +40,7 @@ class User(db.Model):
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(93), nullable=False)
 
-    posts = db.relationship('Upload', backref='uploaded_by', foreign_keys=[Upload.uploader])
+    posts = db.relationship('Upload', backref='user', foreign_keys=[Upload.uploader])
 
     followed = db.relationship(
         'User', secondary=followers_table,
@@ -74,6 +74,11 @@ class User(db.Model):
 
     def follows(self, user: 'User') -> bool:
         return user.id == self.id or self.followed.filter(followers_table.c.followed_id == user.id).count() > 0
+
+    def fetch_feed(self, page=0, step=20):
+        u = Upload.query.filter(Upload.uploader.in_(map(lambda u: u.id, self.followed)) | (Upload.user == self)).order_by(Upload.upload_date)
+
+        return u.slice(page * step, (page + 1) * step)
 
     @classmethod
     def create_from_form(cls, form: RegisterForm):

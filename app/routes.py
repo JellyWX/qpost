@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort, redirect, url_for, session, send_file
+from flask import render_template, request, flash, abort, redirect, url_for, session, send_file, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import app, db
@@ -63,6 +63,17 @@ def view_post_image(id: int):
 
     else:
         return send_file(io.BytesIO(img.image), mimetype='image/jpeg', attachment_filename='{}.jpeg'.format(id))
+
+
+@app.route('/fetch_feed/<int:page>')
+def fetch_feed(page: int):
+    user: typing.Optional[User] = logged_in_as()
+
+    if user is None:
+        return abort(401)
+
+    else:
+        return jsonify({x: d for x, d in map(lambda u: (u.id, u.description), user.fetch_feed())})
 
 
 @app.route('/toggle_follow/<int:id>/')

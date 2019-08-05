@@ -150,6 +150,35 @@ class UserModelCase(unittest.TestCase):
 
         self.assertTrue(u2.followed.count() == 0)
 
+    def test_post(self):
+        u1 = User(username='t1', email='t1@mail.com', password_hash=generate_password_hash('hello world'))
+        db.session.add(u1)
+        u2 = User(username='t2', email='t2@mail.com', password_hash=generate_password_hash('hello world'))
+        db.session.add(u2)
+
+        db.session.commit()
+
+        p1 = Upload(uploader=u1.id, description='test desc', image=0)
+        db.session.add(p1)
+        p2 = Upload(uploader=u2.id, description='test desc', image=0)
+        db.session.add(p2)
+
+        db.session.commit()
+
+        ## No follower relationships
+        feed = u1.fetch_feed(0)
+        self.assertEqual(feed.count(), 1)
+        self.assertEqual(feed[0].uploader, u1.id)
+        self.assertEqual(feed[0].user, u1)
+
+        ## u1 follows u2
+        u1.toggle_follow(u2)
+        feed1 = u1.fetch_feed(0)
+        feed2 = u2.fetch_feed(0)
+
+        self.assertEqual(feed1.count(), 2)
+        self.assertEqual(feed2.count(), 1)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
