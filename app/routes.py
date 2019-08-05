@@ -7,7 +7,7 @@ from app.forms import RegisterForm, LoginForm
 
 from tinyforms.fields import Field, EmailField
 
-from bootstrap_alert import Warning, Danger 
+from bootstrap_alert import Warning, Danger
 
 from wand.image import Image
 
@@ -73,7 +73,7 @@ def fetch_feed(page: int):
         return abort(401)
 
     else:
-        return jsonify({x: d for x, d in map(lambda u: (u.id, u.description), user.fetch_feed())})
+        return jsonify([{'id': x.id, 'desc': x.description} for x in user.fetch_feed()])
 
 
 @app.route('/toggle_follow/<int:id>/')
@@ -157,10 +157,10 @@ def register():
             check_email_query = User.query.filter(User.email == form.email)
             check_username_query = User.query.filter(User.username == form.username)
             if check_email_query.first() is not None:
-                Info('Email taken')
+                Warning('Email taken')
 
             elif check_username_query.first() is not None:
-                Info('Username taken')
+                Warning('Username taken')
 
             else:
                 user = User.create_from_form(form)

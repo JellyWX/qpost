@@ -1,12 +1,63 @@
 <script>
 
 function fetch_feed() {
-    var xhttp = XMLHttpRequest();
+    var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            
+            let feed = document.getElementById("feed");
+            let content = JSON.parse(this.responseText);
+
+            for (post of content) {
+                let img = document.createElement("img");
+                img.classList.add("mx-auto");
+                img.classList.add("card-img-top");
+                img.classList.add("feed-image");
+                img.src = `/post/${post["id"]}/img`;
+
+                let container = document.createElement("div");
+                container.classList.add("feed-image-container");
+
+                container.appendChild(img);
+
+                let card = document.createElement("div");
+                card.classList.add("card");
+                card.classList.add("card-body");
+                card.classList.add("post-description");
+                card.innerHTML = post["desc"]
+
+                feed.appendChild(container);
+                feed.appendChild(card);
+            }
         }
     };
+
+    xhttp.open("GET", "/fetch_feed/0", true);
+    xhttp.send();
 }
+
+</script>
+
+<style>
+
+.feed-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    overflow-y: scroll;
+}
+
+.post-description {
+    margin-bottom: 25px;
+}
+
+</style>
+
+<div id="feed" class="text-center">
+
+</div>
+
+<script>
+
+fetch_feed();
 
 </script>
