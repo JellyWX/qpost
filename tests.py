@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class LoginCase(unittest.TestCase):
     def setUp(self):
-        SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{usern}@localhost/newgram_test?charset=utf8mb4'.format(usern='jude', passwd=None)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{usern}@localhost/newgram_test?charset=utf8mb4'.format(usern='jude', passwd=None)
         db.create_all()
 
     def tearDown(self):
@@ -76,7 +76,7 @@ class LoginCase(unittest.TestCase):
 
 class UserModelCase(unittest.TestCase):
     def setUp(self):
-        SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{usern}@localhost/newgram_test?charset=utf8mb4'.format(usern='jude', passwd=None)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{usern}@localhost/newgram_test?charset=utf8mb4'.format(usern='jude', passwd=None)
         db.create_all()
 
     def tearDown(self):

@@ -2,6 +2,7 @@
 {% block content %}
 <h1>Hello</h1>
 
+{% if logged_in %}
 <h2>Make a post</h2>
 <form method="POST" action="{{ url_for('create_post') }}" enctype="multipart/form-data">
     <input type="text" name="description"></input>
@@ -9,6 +10,7 @@
 
     <input type="submit"></input>
 </form>
+{% endif %}
 
 {% include "feed.html" %}
 {% endblock %}

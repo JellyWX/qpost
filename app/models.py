@@ -76,7 +76,7 @@ class User(db.Model):
         return user.id == self.id or self.followed.filter(followers_table.c.followed_id == user.id).count() > 0
 
     def fetch_feed(self, page=0, step=20):
-        u = Upload.query.filter(Upload.uploader.in_(map(lambda u: u.id, self.followed)) | (Upload.user == self)).order_by(Upload.upload_date)
+        u = Upload.query.filter(Upload.uploader.in_(map(lambda u: u.id, self.followed)) | (Upload.user == self)).order_by(Upload.upload_date.desc())
 
         return u.slice(page * step, (page + 1) * step)
 

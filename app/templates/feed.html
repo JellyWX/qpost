@@ -1,6 +1,6 @@
 <script>
 
-function fetch_feed() {
+function fetch_feed(page) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -31,7 +31,7 @@ function fetch_feed() {
         }
     };
 
-    xhttp.open("GET", "/fetch_feed/0", true);
+    xhttp.open("GET", `/fetch_feed/${page}`, true);
     xhttp.send();
 }
 
@@ -55,9 +55,18 @@ function fetch_feed() {
 <div id="feed" class="text-center">
 
 </div>
+<button onclick="load_new_content();">Load More</button>
 
 <script>
 
-fetch_feed();
+fetch_feed(0);
+
+let current_page = 0;
+
+function load_new_content() {
+    current_page += 1;
+
+    fetch_feed(current_page);
+}
 
 </script>
