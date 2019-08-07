@@ -73,7 +73,7 @@ def fetch_feed(page: int):
         return abort(401)
 
     else:
-        return jsonify([{'id': x.id, 'desc': x.description} for x in user.fetch_feed()])
+        return jsonify([{'id': x.id, 'desc': x.description, 'author': x.user.username, 't': x.upload_date} for x in user.fetch_feed(page)])
 
 
 @app.route('/toggle_follow/<int:id>/')

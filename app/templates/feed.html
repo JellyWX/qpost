@@ -1,11 +1,18 @@
+<script src="{{ url_for('static', filename='moment.js') }}"></script>
+
+
 <script>
 
 function fetch_feed(page) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
+            let now = moment();
+
             let feed = document.getElementById("feed");
             let content = JSON.parse(this.responseText);
+
+            console.log(content);
 
             for (post of content) {
                 let img = document.createElement("img");
@@ -23,7 +30,31 @@ function fetch_feed(page) {
                 card.classList.add("card");
                 card.classList.add("card-body");
                 card.classList.add("post-description");
-                card.innerHTML = post["desc"]
+
+                let title = document.createElement("p");
+                title.classList.add("post-title");
+                title.innerHTML = post["author"];
+
+                let description = document.createElement("p");
+                description.innerHTML = post["desc"];
+
+                let subtext = document.createElement("small");
+                let upload_time = moment.unix(post["t"]);
+
+                let format = "";
+
+                if ((now.unix() - upload_time.unix()) > (60 * 60 * 24 * 365)) {
+                    format = upload_time.calendar();
+                }
+                else {
+                    format = upload_time.fromNow();
+                }
+
+                subtext.innerHTML = `Uploaded ${format}`;
+
+                card.appendChild(title)
+                card.appendChild(description);
+                card.appendChild(subtext)
 
                 feed.appendChild(container);
                 feed.appendChild(card);
@@ -48,6 +79,12 @@ function fetch_feed(page) {
 
 .post-description {
     margin-bottom: 25px;
+    text-align: left;
+}
+
+.post-title {
+    font-size: 1.1em;
+    font-weight: bold;
 }
 
 </style>
